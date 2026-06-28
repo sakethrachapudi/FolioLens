@@ -279,10 +279,25 @@ function xirr(txns, fv, fDate) {
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbzZrng_0FuzFdh-Iepf98O2FOTnesTCie9zlCfSXS_3DBc0w1-fRj41FARj9fupo5oM/exec';
 
+function fetchSheet(sheetName) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.body.removeChild(script);
+      if (data.error) reject(new Error(data.error));
+      else resolve(data);
+    };
+    script.onerror = () => reject(new Error('Script load failed'));
+    script.src = API_URL + '?sheet=' + sheetName + '&callback=' + cbName;
+    document.body.appendChild(script);
+  });
+}
+
 async function loadPortfolioSummary(sheetName) {
   try {
-    const res = await fetch(`${API_URL}?sheet=${sheetName}`);
-    const data = await res.json();
+    const data = await fetchSheet(sheetName);
     if (data.error || !data.funds) return null;
     const FUNDS = data.funds;
     const today = new Date().toISOString().slice(0,10);
