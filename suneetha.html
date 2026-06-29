@@ -86,7 +86,7 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
 .nat-fund-pct{font-family:'DM Mono',monospace;font-size:10px}
 .nat-fund-xirr{font-family:'DM Mono',monospace;font-size:10px}
 .nat-name{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nat-val{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1;margin-bottom:4px}
+.nat-val{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1;margin-bottom:4px;color:var(--tx)}
 .nat-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
 .nat-pct-wrap{flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden;margin:0 8px}
 .nat-pct-fill{height:100%;border-radius:3px}
@@ -97,7 +97,7 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
 .nat-funds{font-size:10px;color:var(--lb);font-family:'DM Mono',monospace;margin-top:2px}
 .nat-inv-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:6px}
 .nat-inv-lbl{font-size:10px;color:var(--lb)}
-.nat-inv-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu)}
+.nat-inv-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--tx)}
 .nat-gain{font-family:'DM Mono',monospace;font-size:10px;margin-top:3px;text-align:right}
 @media(max-width:900px){.cards{grid-template-columns:1fr 1fr}header{padding:14px 16px}.page{padding:0 12px}.nature-grid{grid-template-columns:1fr 1fr}.yr-grid{grid-template-columns:1fr 1fr}}
 </style>
@@ -121,9 +121,9 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
   </div>
   <div class="cards">
     <div class="card"><div class="cl">Total Invested</div><div class="cv" id="sInv">—</div><div class="cs" id="invSub">—</div></div>
-    <div class="card"><div class="cl">Current Value</div><div class="cv pos" id="sVal">—</div><div class="cs" id="sGain"></div></div>
+    <div class="card"><div class="cl">Current Value</div><div class="cv" id="sVal">—</div><div class="cs" id="sGain"></div></div>
     <div class="card ac"><div class="cl">Portfolio XIRR</div><div class="cv" id="sXirr">—</div><div class="cs">exact cashflow return</div></div>
-    <div class="card"><div class="cl">Total Gain</div><div class="cv pos" id="sGainAbs">—</div><div class="cs" id="sMult"></div></div>
+    <div class="card"><div class="cl">Total Gain</div><div class="cv" id="sGainAbs">—</div><div class="cs" id="sMult"></div></div>
   </div>
   <div class="sh">
     <div class="st" id="holdTitle">Holdings</div>
@@ -273,10 +273,12 @@ function render(){
 
   document.getElementById('sInv').textContent=fmt(tInv);
   document.getElementById('sVal').textContent=fmt(tVal);
-  document.getElementById('sGain').innerHTML=`<span class="${posC(tg)}">${pct(tgp)} · ${fmt(Math.abs(tg))}</span>`;
+  document.getElementById('sVal').className='cv';
+  document.getElementById('sGain').innerHTML=`<span class="${posC(tg)}">${tg>=0?'+':'-'}${pct(Math.abs(tgp))} · ${fmt(Math.abs(tg))}</span>`;
   document.getElementById('sXirr').textContent=pXirr!=null?pct(pXirr):'—';
-  document.getElementById('sXirr').className='cv '+posC(pXirr??0);
-  document.getElementById('sGainAbs').textContent=fmt(Math.abs(tg));
+  document.getElementById('sXirr').className='cv '+(pXirr!=null?posC(pXirr):'');
+  document.getElementById('sGainAbs').textContent=(tg>=0?'+':'-')+fmt(Math.abs(tg));
+  document.getElementById('sGainAbs').className='cv '+posC(tg);
   document.getElementById('sMult').textContent=`${(tVal/tInv).toFixed(2)}× money multiplier`;
   document.getElementById('invSub').textContent=`${FUNDS.length} txns · ${FUNDS.length} funds`;
   const liveDate=Object.values(navMap)[0]?.date||'statement';
@@ -306,8 +308,8 @@ function render(){
       </div></td>
       <td class="r mo">${fmt(f.invested)}</td>
       <td class="r mo">${fmt(val)}</td>
-      <td class="r"><span class="mo ${posC(gain)}">${fmt(Math.abs(gain))}</span><br>
-        <span class="bg bg${posC(gain)[0]}">${pct(gp)}</span></td>
+      <td class="r"><span class="mo ${posC(gain)}">${gain>=0?'+':'-'}${fmt(Math.abs(gain))}</span><br>
+        <span class="bg bg${posC(gain)[0]}">${gain>=0?'+':''}${pct(gp)}</span></td>
       <td class="r"><div class="xw">
         <span class="mo ${posC(x??0)}" style="min-width:58px;text-align:right">${x!=null?pct(x):'—'}</span>
         <div class="xb"><div class="xf" style="width:${bw}%;background:${color}"></div></div>
@@ -373,7 +375,7 @@ function render(){
 
     // True market gain = (end value) - (start value) - (fresh investments this year)
     const trueGain = endVal - startVal - freshInvested;
-    const pctGain = startVal > 0 ? (trueGain / startVal * 100) : 0;
+    const pctGain = (startVal + freshInvested) > 0 ? (trueGain / (startVal + freshInvested - withdrawalsThisYear) * 100) : 0;
     const isPartial = yr === currentYear;
 
     const card = document.createElement('div');

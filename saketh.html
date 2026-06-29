@@ -86,7 +86,7 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
 .nat-fund-xirr{font-family:'DM Mono',monospace;font-size:10px}
 .nat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:2px 0 0 2px}
 .nat-name{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nat-val{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1;margin-bottom:4px}
+.nat-val{font-family:'Fraunces',serif;font-size:20px;font-weight:600;line-height:1;margin-bottom:4px;color:var(--tx)}
 .nat-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
 .nat-pct-wrap{flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden;margin:0 8px}
 .nat-pct-fill{height:100%;border-radius:3px}
@@ -97,7 +97,7 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
 .nat-funds{font-size:10px;color:var(--lb);font-family:'DM Mono',monospace;margin-top:2px}
 .nat-inv-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:6px}
 .nat-inv-lbl{font-size:10px;color:var(--lb)}
-.nat-inv-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu)}
+.nat-inv-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--tx)}
 .nat-gain{font-family:'DM Mono',monospace;font-size:10px;margin-top:3px;text-align:right}
 .nat-fund-inv{font-family:'DM Mono',monospace;font-size:9px;color:var(--lb);margin-top:1px}
 @media(max-width:900px){.cards{grid-template-columns:1fr 1fr}.bg2{grid-template-columns:1fr}header{padding:14px 16px}.page{padding:0 12px}.nature-grid{grid-template-columns:1fr 1fr}}
@@ -122,9 +122,9 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
   </div>
   <div class="cards">
     <div class="card"><div class="cl">Total Invested</div><div class="cv" id="sInv">—</div><div class="cs" id="invSub">1112 txns · 26 funds</div></div>
-    <div class="card"><div class="cl">Current Value</div><div class="cv pos" id="sVal">—</div><div class="cs" id="sGain"></div></div>
+    <div class="card"><div class="cl">Current Value</div><div class="cv" id="sVal">—</div><div class="cs" id="sGain"></div></div>
     <div class="card ac"><div class="cl">Portfolio XIRR</div><div class="cv" id="sXirr">—</div><div class="cs">exact cashflow return</div></div>
-    <div class="card"><div class="cl">Total Gain</div><div class="cv pos" id="sGainAbs">—</div><div class="cs" id="sMult"></div></div>
+    <div class="card"><div class="cl">Total Gain</div><div class="cv" id="sGainAbs">—</div><div class="cs" id="sMult"></div></div>
   </div>
   <div class="sh">
     <div class="st" id="holdTitle">Holdings — 26 Funds</div>
@@ -355,8 +355,8 @@ function render() {
       </div></td>
       <td class="r mo">${fmt(f.invested)}</td>
       <td class="r mo">${fmt(val)}</td>
-      <td class="r"><span class="mo ${posC(gain)}">${fmt(Math.abs(gain))}</span><br>
-        <span class="bg bg${posC(gain)[0]}">${pct(gp)}</span></td>
+      <td class="r"><span class="mo ${posC(gain)}">${gain>=0?'+':'-'}${fmt(Math.abs(gain))}</span><br>
+        <span class="bg bg${posC(gain)[0]}">${gain>=0?'+':''}${pct(gp)}</span></td>
       <td class="r"><div class="xw">
         <span class="mo ${posC(x??0)}" style="min-width:58px;text-align:right">${x!=null?pct(x):'—'}</span>
         <div class="xb"><div class="xf" style="width:${bw}%;background:${color}"></div></div>
@@ -385,7 +385,8 @@ function render() {
   const yrGrid = document.getElementById('yrGrid');
   yrGrid.innerHTML = '';
   allYrs.forEach(yr => {
-    const freshInvested = FUNDS.flatMap(f => f.txns.filter(t => t.d.startsWith(yr))).reduce((s,t) => s+t.a, 0);
+    const freshInvested = FUNDS.flatMap(f => f.txns.filter(t => t.d.startsWith(yr) && t.type !== 'sell')).reduce((s,t) => s+t.a, 0);
+    const withdrawalsThisYear = FUNDS.flatMap(f => (f.sells||[]).filter(t => t.d.startsWith(yr))).reduce((s,t) => s+t.a, 0);
     let startVal = 0, endVal = 0;
     FUNDS.forEach(f => {
       const startNav = getNavAtEdge(f, yr, 'start');
@@ -401,7 +402,7 @@ function render() {
       }
     });
     const trueGain = endVal - startVal - freshInvested;
-    const pctGain = startVal > 0 ? (trueGain / startVal * 100) : 0;
+    const pctGain = (startVal + freshInvested) > 0 ? (trueGain / (startVal + freshInvested - withdrawalsThisYear) * 100) : 0;
     const isPartial = yr === currentYear;
     const card = document.createElement('div');
     card.className = 'yr-card';

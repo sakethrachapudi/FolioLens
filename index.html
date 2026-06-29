@@ -59,7 +59,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .pcard-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
 .pcard-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
 .pcard-identity{}
-.pcard-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;line-height:1;margin-bottom:4px}
+.pcard-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;line-height:1;margin-bottom:4px;color:var(--tx)}
 .pcard-owner{font-size:11px;color:var(--mu);font-family:'DM Mono',monospace;letter-spacing:.04em}
 .pcard-badge{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:20px}
 .badge-sip{background:var(--acsb);color:var(--ac);border:1px solid rgba(94,231,183,.2)}
@@ -158,7 +158,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
         </div>
         <div class="pcard-metric">
           <div class="pm-label">Current</div>
-          <div class="pm-value pos" id="s-val">—</div>
+          <div class="pm-value" id="s-val">—</div>
           <div class="pm-sub" id="s-gain">—</div>
         </div>
         <div class="pcard-metric">
@@ -188,7 +188,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
         </div>
         <div class="pcard-metric">
           <div class="pm-label">Current</div>
-          <div class="pm-value pos" id="su-val">—</div>
+          <div class="pm-value" id="su-val">—</div>
           <div class="pm-sub" id="su-gain">—</div>
         </div>
         <div class="pcard-metric">
@@ -218,7 +218,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
         </div>
         <div class="pcard-metric">
           <div class="pm-label">Current</div>
-          <div class="pm-value pos" id="sa-val">—</div>
+          <div class="pm-value" id="sa-val">—</div>
           <div class="pm-sub" id="sa-gain">—</div>
         </div>
         <div class="pcard-metric">
@@ -352,7 +352,9 @@ async function init() {
     const valEl = document.getElementById(`${pfx}-val`);
     valEl.textContent = fmt(p.tVal);
     valEl.className = 'pm-value ' + posC(gain);
-    document.getElementById(`${pfx}-gain`).textContent = pct(gp);
+    const gainEl = document.getElementById(`${pfx}-gain`);
+    gainEl.textContent = (gain>=0?'+':'')+pct(Math.abs(gp));
+    gainEl.className = posC(gain);
     const xirrEl = document.getElementById(`${pfx}-xirr`);
     if (p.portXirr != null) {
       xirrEl.textContent = pct(p.portXirr);
@@ -368,8 +370,12 @@ async function init() {
   const famGp = famGain / famInv * 100;
   document.getElementById('famInv').textContent = fmt(famInv);
   document.getElementById('famVal').textContent = fmt(famVal);
-  document.getElementById('famGain').textContent = pct(famGp);
-  document.getElementById('famGainAbs').textContent = fmt(Math.abs(famGain));
+  const famGainEl = document.getElementById('famGain');
+  famGainEl.textContent = (famGain>=0?'+':'')+pct(Math.abs(famGp));
+  famGainEl.className = posC(famGain);
+  const fgEl = document.getElementById('famGainAbs');
+  fgEl.textContent = (famGain>=0?'+':'-')+fmt(Math.abs(famGain));
+  fgEl.className = 'tc-value '+posC(famGain);
   document.getElementById('famMult').textContent = `${(famVal/famInv).toFixed(2)}× money multiplier`;
 
   // For family XIRR we'd need all txns — approximated with weighted average for now
