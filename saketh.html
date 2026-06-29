@@ -356,7 +356,7 @@ function render() {
       <td class="r mo">${fmt(f.invested)}</td>
       <td class="r mo">${fmt(val)}</td>
       <td class="r"><span class="mo ${posC(gain)}">${gain>=0?'+':'-'}${fmt(Math.abs(gain))}</span><br>
-        <span class="bg bg${posC(gain)[0]}">${pct(gp)}</span></td>
+        <span class="bg bg${posC(gain)[0]}">${gain>=0?'+':''}${gp.toFixed(2)}%</span></td>
       <td class="r"><div class="xw">
         <span class="mo ${posC(x??0)}" style="min-width:58px;text-align:right">${x!=null?pct(x):'—'}</span>
         <div class="xb"><div class="xf" style="width:${bw}%;background:${color}"></div></div>

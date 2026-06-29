@@ -275,9 +275,9 @@ function render(){
   document.getElementById('sVal').textContent=fmt(tVal);
   
   document.getElementById('sGain').innerHTML=`<span class="${posC(tg)}">${pct(tgp)} · ${fmt(Math.abs(tg))}</span>`;
-  document.getElementById('sXirr').textContent=pXirr!=null?pct(pXirr):'—';
+  document.getElementById('sXirr').textContent=pXirr!=null?(Math.abs(pXirr)<0.005?'0.00%':pct(pXirr)):'—';
   document.getElementById('sXirr').className='cv '+(pXirr!=null?posC(pXirr):'');
-  document.getElementById('sGainAbs').textContent=(tg>=0?'+':'-')+fmt(Math.abs(tg));
+  document.getElementById('sGainAbs').textContent=Math.abs(tg)<1?'₹0':(tg>=0?'+':'-')+fmt(Math.abs(tg));
   document.getElementById('sGainAbs').className='cv '+posC(tg);
   document.getElementById('sMult').textContent=`${(tVal/tInv).toFixed(2)}× money multiplier`;
   document.getElementById('invSub').textContent=`${FUNDS.length} txns · ${FUNDS.length} funds`;
@@ -309,7 +309,7 @@ function render(){
       <td class="r mo">${fmt(f.invested)}</td>
       <td class="r mo">${fmt(val)}</td>
       <td class="r"><span class="mo ${posC(gain)}">${gain>=0?'+':'-'}${fmt(Math.abs(gain))}</span><br>
-        <span class="bg bg${posC(gain)[0]}">${pct(gp)}</span></td>
+        <span class="bg bg${posC(gain)[0]}">${gain>=0?'+':''}${gp.toFixed(2)}%</span></td>
       <td class="r"><div class="xw">
         <span class="mo ${posC(x??0)}" style="min-width:58px;text-align:right">${x!=null?pct(x):'—'}</span>
         <div class="xb"><div class="xf" style="width:${bw}%;background:${color}"></div></div>
@@ -331,6 +331,7 @@ function render(){
     // Investments made IN this year
     const yrInvestments = FUNDS.flatMap(f => f.txns.filter(t => t.d.startsWith(yr)).map(t => t.a));
     const freshInvested = yrInvestments.reduce((s,a) => s+a, 0);
+    const withdrawalsThisYear = 0;
 
     // Portfolio value at START of year = value using NAVs at start of year (approx via first txn of that year or prior)
     // We approximate start-of-year value using the last transaction NAV of the previous year for each fund
