@@ -41,7 +41,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .tc{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:20px 22px;position:relative;overflow:hidden}
 .tc.highlight{border-color:rgba(94,231,183,.3);background:var(--acsb)}
 .tc-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--lb);margin-bottom:10px}
-.tc-value{font-family:'Fraunces',serif;font-size:26px;font-weight:600;line-height:1}
+.tc-value{font-family:'Fraunces',serif;font-size:26px;font-weight:600;line-height:1;color:var(--tx)}
 .tc-sub{font-size:11px;color:var(--mu);font-family:'DM Mono',monospace;margin-top:7px}
 .pos{color:var(--ac)}.neg{color:var(--rd)}
 
@@ -71,7 +71,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .pcard-metric:last-child{border-right:none}
 .pcard-metric+.pcard-metric{border-left:1px solid var(--bd)}
 .pm-label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--lb);margin-bottom:6px}
-.pm-value{font-family:'Fraunces',serif;font-size:18px;font-weight:600;line-height:1}
+.pm-value{font-family:'Fraunces',serif;font-size:18px;font-weight:600;line-height:1;color:var(--tx)}
 .pm-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);margin-top:4px}
 .pcard-arrow{position:absolute;bottom:24px;right:24px;font-size:18px;color:var(--lb);transition:color .2s,transform .2s}
 .pcard:hover .pcard-arrow{color:var(--tx);transform:translateX(3px)}
@@ -348,12 +348,14 @@ async function init() {
     const gain = p.tVal - p.tInv;
     const gp = gain / p.tInv * 100;
 
-    document.getElementById(`${pfx}-inv`).textContent = fmt(p.tInv);
+    const invEl = document.getElementById(`${pfx}-inv`);
+    invEl.textContent = fmt(p.tInv);
+    invEl.className = 'pm-value';
     const valEl = document.getElementById(`${pfx}-val`);
     valEl.textContent = fmt(p.tVal);
     valEl.className = 'pm-value ' + posC(gain);
     const gainEl = document.getElementById(`${pfx}-gain`);
-    gainEl.textContent = (gain>=0?'+':'')+pct(Math.abs(gp));
+    gainEl.textContent = pct(gp);
     gainEl.className = posC(gain);
     const xirrEl = document.getElementById(`${pfx}-xirr`);
     if (p.portXirr != null) {
@@ -369,9 +371,10 @@ async function init() {
   const famGain = famVal - famInv;
   const famGp = famGain / famInv * 100;
   document.getElementById('famInv').textContent = fmt(famInv);
+  document.getElementById('famInv').className = 'tc-value';
   document.getElementById('famVal').textContent = fmt(famVal);
   const famGainEl = document.getElementById('famGain');
-  famGainEl.textContent = (famGain>=0?'+':'')+pct(Math.abs(famGp));
+  famGainEl.textContent = pct(famGp);
   famGainEl.className = posC(famGain);
   const fgEl = document.getElementById('famGainAbs');
   fgEl.textContent = (famGain>=0?'+':'-')+fmt(Math.abs(famGain));

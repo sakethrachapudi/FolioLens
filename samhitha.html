@@ -29,7 +29,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0}
 .card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:18px 20px}
 .cl{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--lb);text-transform:uppercase;margin-bottom:8px}
-.cv{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1}
+.cv{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1;color:var(--tx)}
 .cs{font-size:11px;color:var(--mu);margin-top:6px;font-family:'DM Mono',monospace}
 .card.ac{border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.04)}
 .pos{color:var(--ac)}.neg{color:var(--rd)}
@@ -273,8 +273,8 @@ function render(){
 
   document.getElementById('sInv').textContent=fmt(tInv);
   document.getElementById('sVal').textContent=fmt(tVal);
-  document.getElementById('sVal').className='cv';
-  document.getElementById('sGain').innerHTML=`<span class="${posC(tg)}">${tg>=0?'+':'-'}${pct(Math.abs(tgp))} · ${fmt(Math.abs(tg))}</span>`;
+  
+  document.getElementById('sGain').innerHTML=`<span class="${posC(tg)}">${pct(tgp)} · ${fmt(Math.abs(tg))}</span>`;
   document.getElementById('sXirr').textContent=pXirr!=null?pct(pXirr):'—';
   document.getElementById('sXirr').className='cv '+(pXirr!=null?posC(pXirr):'');
   document.getElementById('sGainAbs').textContent=(tg>=0?'+':'-')+fmt(Math.abs(tg));
@@ -309,7 +309,7 @@ function render(){
       <td class="r mo">${fmt(f.invested)}</td>
       <td class="r mo">${fmt(val)}</td>
       <td class="r"><span class="mo ${posC(gain)}">${gain>=0?'+':'-'}${fmt(Math.abs(gain))}</span><br>
-        <span class="bg bg${posC(gain)[0]}">${gain>=0?'+':''}${pct(gp)}</span></td>
+        <span class="bg bg${posC(gain)[0]}">${pct(gp)}</span></td>
       <td class="r"><div class="xw">
         <span class="mo ${posC(x??0)}" style="min-width:58px;text-align:right">${x!=null?pct(x):'—'}</span>
         <div class="xb"><div class="xf" style="width:${bw}%;background:${color}"></div></div>

@@ -26,7 +26,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:24px 0}
 .card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:18px 20px}
 .cl{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--lb);text-transform:uppercase;margin-bottom:8px}
-.cv{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1}
+.cv{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1;color:var(--tx)}
 .cs{font-size:11px;color:var(--mu);margin-top:6px;font-family:'DM Mono',monospace}
 .card.ac{border-color:rgba(94,231,183,.3);background:rgba(94,231,183,.04)}
 .pos{color:var(--ac)}.neg{color:var(--rd)}
@@ -356,7 +356,7 @@ function render() {
       <td class="r mo">${fmt(f.invested)}</td>
       <td class="r mo">${fmt(val)}</td>
       <td class="r"><span class="mo ${posC(gain)}">${gain>=0?'+':'-'}${fmt(Math.abs(gain))}</span><br>
-        <span class="bg bg${posC(gain)[0]}">${gain>=0?'+':''}${pct(gp)}</span></td>
+        <span class="bg bg${posC(gain)[0]}">${pct(gp)}</span></td>
       <td class="r"><div class="xw">
         <span class="mo ${posC(x??0)}" style="min-width:58px;text-align:right">${x!=null?pct(x):'—'}</span>
         <div class="xb"><div class="xf" style="width:${bw}%;background:${color}"></div></div>
@@ -385,8 +385,8 @@ function render() {
   const yrGrid = document.getElementById('yrGrid');
   yrGrid.innerHTML = '';
   allYrs.forEach(yr => {
-    const freshInvested = FUNDS.flatMap(f => f.txns.filter(t => t.d.startsWith(yr) && t.type !== 'sell')).reduce((s,t) => s+t.a, 0);
-    const withdrawalsThisYear = FUNDS.flatMap(f => (f.sells||[]).filter(t => t.d.startsWith(yr))).reduce((s,t) => s+t.a, 0);
+    const freshInvested = FUNDS.flatMap(f => f.txns.filter(t => t.d.startsWith(yr))).reduce((s,t) => s+t.a, 0);
+    const withdrawalsThisYear = 0;
     let startVal = 0, endVal = 0;
     FUNDS.forEach(f => {
       const startNav = getNavAtEdge(f, yr, 'start');
