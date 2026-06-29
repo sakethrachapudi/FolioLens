@@ -72,7 +72,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .pcard-metric+.pcard-metric{border-left:1px solid var(--bd)}
 .pm-label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--lb);margin-bottom:6px}
 .pm-value{font-family:'Fraunces',serif;font-size:18px;font-weight:600;line-height:1;color:var(--tx)}
-.pm-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);margin-top:4px}
+.pm-sub{font-family:'DM Mono',monospace;font-size:10px;margin-top:4px}
 .pcard-arrow{position:absolute;bottom:24px;right:24px;font-size:18px;color:var(--lb);transition:color .2s,transform .2s}
 .pcard:hover .pcard-arrow{color:var(--tx);transform:translateX(3px)}
 .pcard-placeholder-msg{font-size:12px;color:var(--lb);margin-top:20px;padding-top:20px;border-top:1px solid var(--bd);font-family:'DM Mono',monospace}
@@ -117,7 +117,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     </div>
     <div class="tc">
       <div class="tc-label">Current Value</div>
-      <div class="tc-value pos" id="famVal">—</div>
+      <div class="tc-value" id="famVal">—</div>
       <div class="tc-sub" id="famGain">—</div>
     </div>
     <div class="tc highlight">
@@ -127,7 +127,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
     </div>
     <div class="tc">
       <div class="tc-label">Total Gain</div>
-      <div class="tc-value pos" id="famGainAbs">—</div>
+      <div class="tc-value" id="famGainAbs">—</div>
       <div class="tc-sub" id="famMult">—</div>
     </div>
   </div>
@@ -353,14 +353,17 @@ async function init() {
     invEl.className = 'pm-value';
     const valEl = document.getElementById(`${pfx}-val`);
     valEl.textContent = fmt(p.tVal);
-    valEl.className = 'pm-value ' + posC(gain);
+    valEl.className = 'pm-value';
     const gainEl = document.getElementById(`${pfx}-gain`);
-    gainEl.textContent = pct(gp);
-    gainEl.className = posC(gain);
+    gainEl.textContent = (gain>=0?'+':'-') + fmt(Math.abs(gain)) + ' (' + pct(gp) + ')';
+    gainEl.style.color = gain>=0 ? 'var(--ac)' : 'var(--rd)';
     const xirrEl = document.getElementById(`${pfx}-xirr`);
     if (p.portXirr != null) {
       xirrEl.textContent = pct(p.portXirr);
       xirrEl.className = 'pm-value ' + posC(p.portXirr);
+    } else {
+      xirrEl.textContent = '—';
+      xirrEl.className = 'pm-value';
     }
     if (document.getElementById(`${pfx}-funds`)) {
       document.getElementById(`${pfx}-funds`).textContent = `${p.fundCount} funds`;
@@ -373,6 +376,7 @@ async function init() {
   document.getElementById('famInv').textContent = fmt(famInv);
   document.getElementById('famInv').className = 'tc-value';
   document.getElementById('famVal').textContent = fmt(famVal);
+  document.getElementById('famVal').className = 'tc-value';
   const famGainEl = document.getElementById('famGain');
   famGainEl.textContent = pct(famGp);
   famGainEl.className = posC(famGain);
@@ -392,6 +396,7 @@ async function init() {
   const xirrEl = document.getElementById('famXirr');
   if (famXirrVal != null) {
     xirrEl.textContent = pct(famXirrVal);
+    xirrEl.className = 'tc-value ' + (famXirrVal >= 0 ? 'pos' : 'neg');
     xirrEl.className = 'tc-value ' + posC(famXirrVal);
   }
 
