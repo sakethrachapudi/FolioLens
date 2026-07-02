@@ -228,24 +228,22 @@ const ISIN_SCHEME = {"INF090I01171":100471,"INF179K01608":101762,"INF789F01810":
 async function fetchNAV(isin){
   const schemeCode = ISIN_SCHEME[isin];
 
-  // Strategy 1: mfapi.in via allorigins proxy (most current NAVs)
+  // Strategy 1: mfapi.in via corsproxy.io (most current NAVs — 1 day ahead of captnemo)
   if(schemeCode){
     try{
       const url = `https://api.mfapi.in/mf/${schemeCode}`;
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const r = await fetchWithTimeout(proxyUrl, 15000);
+      const r = await fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(url)}`, 15000);
       if(r.ok){
         const j = await r.json();
         if(j && j.data && j.data[0]){
           const latest = j.data[0];
           const nav = parseFloat(latest.nav);
-          // Convert dd-mm-yyyy to yyyy-mm-dd
           const parts = latest.date.split('-');
           const date = parts.length===3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : latest.date;
           if(nav > 0) return { nav, date, name: j.meta?.scheme_name||'' };
         }
       }
-    }catch(e){ console.warn('mfapi failed:', isin, e.message); }
+    }catch(e){ console.warn('mfapi failed:', isin); }
   }
 
   // Strategy 2: captnemo fallback
