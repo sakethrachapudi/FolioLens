@@ -116,7 +116,7 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
   <div class="banner" id="banner">
     <div class="spinner"></div>
     <div style="flex:1">
-      <div id="bMsg">Fetching live NAVs from mf.captnemo.in…</div>
+      <div id="bMsg">Fetching live NAVs from mfapi.in…</div>
       <div class="prog"><div class="prog-fill" id="prog" style="width:0%"></div></div>
     </div>
   </div>
@@ -223,30 +223,36 @@ const td    = () => new Date().toISOString().slice(0,10);
 const setStatus = (s,t) => { document.getElementById('sDot').className='dot '+s; document.getElementById('sTxt').textContent=t; };
 
 // ── Fetch NAV by ISIN from captnemo (CORS-enabled, ISIN-direct) ────────────
-async function fetchNAV(isin) {
-  // Strategy 1: mf.captnemo.in — ISIN-based, CORS-enabled
-  try {
-    const r = await fetchWithTimeout(`https://mf.captnemo.in/nav/${isin}`, 12000);
-    if (r.ok) {
-      const j = await r.json();
-      if (j.nav && parseFloat(j.nav) > 0) {
-        return { nav: parseFloat(j.nav), date: j.date || '', name: j.name || '' };
-      }
-    }
-  } catch(e) { console.warn('captnemo failed:', isin, e.message); }
+const ISIN_SCHEME = {"INF090I01171": 100471, "INF179K01608": 101762, "INF789F01810": 102394, "INF200K01370": 102756, "INF174K01211": 102875, "INF760K01167": 102920, "INF789F01AG5": 103098, "INF090I01841": 103151, "INF204K01GE7": 104637, "INF179K01CR2": 105758, "INF090I01981": 105817, "INF740K01037": 105875, "INF109K01BL4": 108466, "INF769K01101": 112932, "INF846K01859": 114564, "INF740K01LP6": 117691, "INF754K01CE0": 118624, "INF204K01XF9": 118650, "INF204K01E54": 118668, "INF179K01UT0": 118955, "INF179K01XQ0": 118989, "INF179K01XZ1": 119062, "INF200K01RY0": 119609, "INF174K01JP2": 119750, "INF200K01UT4": 119800, "INF109K01Y07": 120251, "INF109K015K4": 120334, "INF109K01S39": 120616, "INF966L01689": 120828, "INF879O01027": 122639, "INF879O01019": 122640, "INF179KA1RW5": 130503, "INF200KA1473": 133858, "INF277K01Z44": 135797, "INF205K013T3": 145137, "INF194KB1AL4": 147946, "INF204KB19V4": 148457, "INF109KC1O90": 148653, "INF879O01175": 148958, "INF109KC1R14": 148990, "INF174KA1HV3": 149185, "INF179KC1BV9": 149366, "INF846K013E0": 149383, "INF204KC1BL9": 152034};
 
-  // Strategy 2: mf.captnemo.in/kuvera/:isin (alternate endpoint same API)
-  try {
-    const r = await fetchWithTimeout(`https://mf.captnemo.in/kuvera/${isin}`, 12000);
-    if (r.ok) {
-      const j = await r.json();
-      const entry = Array.isArray(j) ? j[0] : j;
-      if (entry?.nav?.nav) {
-        return { nav: parseFloat(entry.nav.nav), date: entry.nav.date || '', name: entry.name || '' };
+async function fetchNAV(isin){
+  // Strategy 1: mfapi.in via JSONP (most current NAVs)
+  const schemeCode = ISIN_SCHEME[isin];
+  if(schemeCode){
+    try{
+      const data = await new Promise((res,rej)=>{
+        const cb='mfcb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+        const s=document.createElement('script');
+        window[cb]=(d)=>{delete window[cb];document.body.removeChild(s);res(d);};
+        s.onerror=()=>{delete window[cb];document.body.removeChild(s);rej(new Error('fail'));};
+        s.src=`https://api.mfapi.in/mf/${schemeCode}?callback=${cb}`;
+        document.body.appendChild(s);
+      });
+      if(data&&data.data&&data.data[0]){
+        const latest=data.data[0];
+        const nav=parseFloat(latest.nav);
+        // Convert date from dd-mm-yyyy to yyyy-mm-dd
+        const parts=latest.date.split('-');
+        const date=parts.length===3?`${parts[2]}-${parts[1]}-${parts[0]}`:latest.date;
+        if(nav>0) return{nav,date,name:data.meta?.scheme_name||''};
       }
-    }
-  } catch(e) { console.warn('captnemo/kuvera failed:', isin, e.message); }
-
+    }catch(e){console.warn('mfapi failed:',isin,e.message);}
+  }
+  // Strategy 2: captnemo fallback
+  try{
+    const r=await fetchWithTimeout(`https://mf.captnemo.in/nav/${isin}`,12000);
+    if(r.ok){const j=await r.json();if(j.nav&&parseFloat(j.nav)>0)return{nav:parseFloat(j.nav),date:j.date||'',name:j.name||''};}
+  }catch(e){console.warn('captnemo failed:',isin);}
   return null;
 }
 
@@ -330,7 +336,7 @@ function render() {
   document.getElementById('sGainAbs').textContent = fmt(Math.abs(tg));
   document.getElementById('sMult').textContent = `${(tVal/tInv).toFixed(2)}× money multiplier`;
   const liveDate = Object.values(navMap)[0]?.date || 'statement';
-  document.getElementById('navDate').textContent = `NAV as of ${liveDate} · mf.captnemo.in · auto-refresh 5 min`;
+  document.getElementById('navDate').textContent = `NAV as of ${liveDate} · mfapi.in (primary) · auto-refresh 5 min`;
 
   // Table
   const tb = document.getElementById('tbody'); tb.innerHTML='';
