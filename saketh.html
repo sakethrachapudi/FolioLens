@@ -160,11 +160,7 @@ td{padding:12px 15px;vertical-align:middle}td.r{text-align:right}
 </div>
 <script>
 const PAL=['#5ee7b7','#7b8ef7','#f5c542','#ff6b6b','#a78bfa','#38bdf8','#fb923c','#e879f9','#34d399','#facc15','#f472b6','#60a5fa','#c084fc','#fb7185','#2dd4bf','#a3e635','#fbbf24','#818cf8','#4ade80','#22d3ee','#fdba74','#94a3b8','#f43f5e','#0891b2','#9333ea','#ca8a04'];
-// Two CORS-enabled APIs — try captnemo first, fallback to mfapi via allorigins proxy
-const APIS=[
-  isin=>`https://mf.captnemo.in/nav/${isin}`,
-  isin=>`https://api.allorigins.win/raw?url=${encodeURIComponent('https://api.mfapi.in/mf/search?q='+isin)}`
-];
+
 let navMap={}, refreshTimer;
 let FUNDS = [];
 const API_URL = 'https://script.google.com/macros/s/AKfycbzZrng_0FuzFdh-Iepf98O2FOTnesTCie9zlCfSXS_3DBc0w1-fRj41FARj9fupo5oM/exec';
