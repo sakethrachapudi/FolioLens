@@ -334,7 +334,7 @@ function render() {
 
   // Table
   const tb = document.getElementById('tbody'); tb.innerHTML='';
-  rows.sort((a,b) => b.f.invested - a.f.invested);
+  rows.sort((a,b) => (b.x??-Infinity) - (a.x??-Infinity));
   rows.forEach(({f,nav,isLive,navDate,val,gain,gp,x,color}) => {
     const avgNav = f.invested/f.units;
     const bw = Math.min(Math.abs(x??0)/40*100, 100);

@@ -287,7 +287,7 @@ function render(){
 
   // Table
   const tb=document.getElementById('tbody');tb.innerHTML='';
-  rows.sort((a,b)=>b.f.invested-a.f.invested);
+  rows.sort((a,b)=>(b.x??-Infinity)-(a.x??-Infinity));
   rows.forEach(({f,nav,isLive,navDate,val,gain,gp,x,color})=>{
     const avgNav=f.invested/f.units;
     const bw=Math.min(Math.abs(x??0)/40*100,100);
@@ -411,7 +411,7 @@ function render(){
     const share=(data.val/tVal*100);
     const color=NAT_PAL[cat]||NAT_PAL['Other'];
     const natXirr=xirr(data.txns,data.val,td);
-    const fundRowsHtml=data.fundRows.sort((a,b)=>b.val-a.val).map(({f,val:fval,inv:finv,x:fx,color:fc})=>{
+    const fundRowsHtml=data.fundRows.sort((a,b)=>(b.x??-Infinity)-(a.x??-Infinity)).map(({f,val:fval,inv:finv,x:fx,color:fc})=>{
       const fShare=(fval/data.val*100).toFixed(1);
       const shortName=f.name.length>34?f.name.slice(0,32)+'…':f.name;
       const xc=fx!=null?(fx>=0?'var(--ac)':'var(--rd)'):'var(--mu)';
