@@ -228,7 +228,7 @@ async function fetchNAV(isin){
   if(schemeCode){
     try{
       const url = `https://api.mfapi.in/mf/${schemeCode}`;
-      const r = await fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(url)}`, 15000);
+      const r = await fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(url)}`, 20000);
       if(r.ok){
         const j = await r.json();
         if(j && j.data && j.data[0]){
@@ -274,19 +274,18 @@ async function init() {
     return;
   }
 
-  // Step 2: Fetch live NAVs in parallel
-  let done = 0;
-  render();
-  await Promise.allSettled(FUNDS.map(async f => {
+  // Step 2: Fetch live NAVs sequentially (more reliable with corsproxy)
+  const total = FUNDS.length;
+  for(let i = 0; i < FUNDS.length; i++){
+    const f = FUNDS[i];
     try {
       const data = await fetchNAV(f.isin);
       if (data) navMap[f.isin] = data;
     } catch(e) { console.warn(f.isin, e); }
-    done++;
-    document.getElementById('prog').style.width = 30 + Math.round(done/FUNDS.length*70) + '%';
-    document.getElementById('bMsg').textContent = `NAV ${done}/${FUNDS.length}: ${f.name.split(' ').slice(0,3).join(' ')}…`;
+    document.getElementById('prog').style.width = 30 + Math.round((i+1)/total*70) + '%';
+    document.getElementById('bMsg').textContent = `NAV ${i+1}/${total}: ${f.name.split(' ').slice(0,3).join(' ')}…`;
     render();
-  }));
+  }
 
   document.getElementById('banner').classList.add('gone');
   document.getElementById('btnR').disabled = false;
